@@ -1,0 +1,38 @@
+flowchart TB
+  Users[Users / Internet] --> DNS[Route 53 DNS]
+  DNS --> ALB[HTTPS Application Load Balancer]
+
+  subgraph VPC["VPC - 2 Availability Zones"]
+    direction TB
+    subgraph Public["Public tier"]
+      ALB
+      NAT1[NAT Gateway AZ-A]
+      NAT2[NAT Gateway AZ-B]
+    end
+    subgraph App["Private application tier"]
+      EC2A[EC2 AZ-A]
+      EC2B[EC2 AZ-B]
+      ASG[Auto Scaling Group]
+      ASG --- EC2A
+      ASG --- EC2B
+    end
+    subgraph Data["Isolated database tier"]
+      RDSA[(RDS primary)]
+      RDSB[(RDS standby)]
+      RDSA -. synchronous replication .-> RDSB
+    end
+    ALB --> EC2A
+    ALB --> EC2B
+    EC2A --> RDSA
+    EC2B --> RDSA
+  end
+
+  ALB --> LOGS[(S3 ALB logs)]
+  EC2A --> DATA[(KMS-encrypted S3)]
+  EC2B --> DATA
+  RDSA --> SECRET[Secrets Manager]
+  CW[CloudWatch logs / metrics / alarms] --> SNS[SNS notification]
+  EC2A -.-> CW
+  EC2B -.-> CW
+  RDSA -.-> CW
+

@@ -1,0 +1,32 @@
+framework:
+  - terraform
+compact: true
+quiet: true
+skip-download: true
+skip-check:
+  # The dedicated ALB log bucket is itself the terminal audit destination.
+  - CKV_AWS_18
+  # Access-log delivery supports SSE-S3, not customer-managed KMS keys.
+  - CKV_AWS_145
+  # Deletion protection is environment-driven: enabled in prod, disabled for disposable dev.
+  - CKV_AWS_150
+  - CKV_AWS_293
+  # Multi-AZ is enabled in staging/prod; dev is intentionally cost-optimized.
+  - CKV_AWS_157
+  # Public port 80 performs only an ALB HTTP-to-HTTPS redirect; app port 80 is SG-to-SG only.
+  - CKV_AWS_260
+  # The account-root KMS statement enables IAM delegation; the service statement is context-scoped.
+  - CKV_AWS_109
+  - CKV_AWS_111
+  - CKV_AWS_356
+  # Flow logs and SG attachments are composed across modules, which graph-less scanning cannot correlate.
+  - CKV2_AWS_11
+  - CKV2_AWS_5
+  # Notifications are workload-specific and are not required for these storage/log destinations.
+  - CKV2_AWS_62
+  # Cross-region replication is outside this single-region portfolio scope and would add cost.
+  - CKV_AWS_144
+  # The state bucket intentionally retains all versions; lifecycle is an account retention decision.
+  - CKV2_AWS_61
+  # WAF is documented as the next hardening stage and omitted from this project's requested services.
+  - CKV2_AWS_28

@@ -1,0 +1,121 @@
+name: Terraform CI and deployment
+
+on:
+  pull_request:
+    paths: ["**.tf", "**.tfvars", ".github/workflows/terraform.yml"]
+  push:
+    branches: [main]
+    paths: ["**.tf", "**.tfvars", ".github/workflows/terraform.yml"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to plan or deploy
+        required: true
+        type: choice
+        options: [dev, staging, prod]
+      action:
+        description: Plan only or apply after environment approval
+        required: true
+        type: choice
+        options: [plan, apply]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_INPUT: false
+  TF_ENV: ${{ inputs.environment || 'dev' }}
+  AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
+  TF_VAR_certificate_arn: ${{ vars.ACM_CERTIFICATE_ARN }}
+  TF_VAR_alert_email: ${{ vars.ALERT_EMAIL }}
+  TF_VAR_route53_zone_id: ${{ vars.ROUTE53_ZONE_ID }}
+  TF_VAR_domain_name: ${{ vars.DOMAIN_NAME }}
+
+jobs:
+  quality:
+    name: Format, validate, lint, security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: "1.13.3" }
+      - uses: terraform-linters/setup-tflint@v5
+      - name: Terraform format
+        run: terraform fmt -check -recursive
+      - name: Initialize TFLint
+        run: tflint --init
+      - name: TFLint
+        run: tflint --recursive
+      - name: Validate all environments
+        run: |
+          for environment in dev staging prod; do
+            terraform -chdir="environments/$environment" init -backend=false
+            terraform -chdir="environments/$environment" validate
+          done
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          config_file: .checkov.yml
+
+  plan:
+    name: Plan ${{ inputs.environment || 'dev' }}
+    needs: quality
+    if: ${{ vars.AWS_ROLE_ARN != '' && vars.TF_STATE_BUCKET != '' && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: "1.13.3" }
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Terraform init
+        run: >-
+          terraform -chdir="environments/$TF_ENV" init
+          -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+          -backend-config="key=three-tier/$TF_ENV/terraform.tfstate"
+          -backend-config="region=$AWS_REGION"
+          -backend-config="encrypt=true"
+          -backend-config="use_lockfile=true"
+      - name: Terraform plan
+        run: terraform -chdir="environments/$TF_ENV" plan -out=tfplan
+      - name: Upload reviewed plan
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.action == 'apply' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ env.TF_ENV }}
+          path: environments/${{ env.TF_ENV }}/tfplan
+          retention-days: 1
+
+  apply:
+    name: Apply after approval
+    needs: plan
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.action == 'apply' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: "1.13.3" }
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Terraform init
+        run: >-
+          terraform -chdir="environments/$TF_ENV" init
+          -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+          -backend-config="key=three-tier/$TF_ENV/terraform.tfstate"
+          -backend-config="region=$AWS_REGION"
+          -backend-config="encrypt=true"
+          -backend-config="use_lockfile=true"
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ env.TF_ENV }}
+          path: environments/${{ env.TF_ENV }}
+      - name: Terraform apply
+        run: terraform -chdir="environments/$TF_ENV" apply -auto-approve tfplan

@@ -1,0 +1,7 @@
+aws_region      = "eu-central-1"
+owner           = "Narendra-Singh"
+certificate_arn = "arn:aws:acm:eu-central-1:123456789012:certificate/REPLACE-ME"
+alert_email     = "you@example.com"
+# route53_zone_id = "Z0123456789EXAMPLE"
+# domain_name     = "dev-app.example.com"
+
