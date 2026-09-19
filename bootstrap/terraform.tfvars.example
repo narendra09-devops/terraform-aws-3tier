@@ -2,7 +2,7 @@ aws_region          = "eu-central-1"
 state_bucket_name   = "REPLACE-ME-terraform-state"
 github_repository   = "narendra09-devops/terraform-aws-3tier"
 github_branches     = ["main"]
-github_environments = ["dev", "staging", "prod"]
+github_environments = ["dev"]
 
 # ReadOnlyAccess is sufficient for a CI plan in many accounts. Before enabling
 # apply, replace it with a reviewed, account-specific deployment policy.

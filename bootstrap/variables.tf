@@ -13,7 +13,7 @@ variable "github_branches" {
 }
 variable "github_environments" {
   type    = list(string)
-  default = ["dev", "staging", "prod"]
+  default = ["dev"]
 }
 variable "deployment_policy_arns" {
   description = "Policies for the GitHub role. Default supports plan/read; supply a reviewed scoped deployment policy before enabling apply."
