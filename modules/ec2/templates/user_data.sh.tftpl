@@ -20,12 +20,12 @@ chmod 0640 /etc/three-tier/runtime.env
 cat >/usr/share/nginx/html/index.html <<EOF
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Production 3-Tier AWS</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AWS 3-Tier Infrastructure Demo</title></head>
 <body style="font-family:system-ui;max-width:720px;margin:80px auto;padding:24px;background:#f7fafc;color:#172033">
   <p style="color:#ff9900;font-weight:700">AWS + TERRAFORM</p>
-  <h1>Production 3-Tier Platform</h1>
+  <h1>AWS 3-Tier Infrastructure Demo</h1>
   <p>Healthy response from EC2 instance <strong>$${INSTANCE_ID}</strong> in <strong>$${AZ}</strong>.</p>
-  <p>Traffic path: Route 53 - ALB - Auto Scaling EC2 - private RDS.</p>
+  <p>Traffic path: ALB - Auto Scaling EC2 - private RDS.</p>
 </body>
 </html>
 EOF
