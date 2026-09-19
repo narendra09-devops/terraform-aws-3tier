@@ -75,8 +75,8 @@ data "aws_iam_policy_document" "github_trust" {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values = concat(
-        [for branch in var.github_branches : "repo:${var.github_repository}:ref:refs/heads/${branch}"],
-        [for environment in var.github_environments : "repo:${var.github_repository}:environment:${environment}"]
+        [for branch in var.github_branches : "repo:${local.github_oidc_repository}:ref:refs/heads/${branch}"],
+        [for environment in var.github_environments : "repo:${local.github_oidc_repository}:environment:${environment}"]
       )
     }
   }
