@@ -21,6 +21,7 @@ data "aws_iam_policy_document" "github_apply_network_compute" {
     sid = "ManageRegionalNetworkAndCompute"
     actions = [
       "ec2:AllocateAddress",
+      "ec2:AttachVolume",
       "ec2:AssociateAddress",
       "ec2:AssociateRouteTable",
       "ec2:AttachInternetGateway",
@@ -28,6 +29,7 @@ data "aws_iam_policy_document" "github_apply_network_compute" {
       "ec2:AuthorizeSecurityGroupIngress",
       "ec2:CreateFlowLogs",
       "ec2:CreateInternetGateway",
+      "ec2:CreateNetworkInterface",
       "ec2:CreateLaunchTemplate",
       "ec2:CreateLaunchTemplateVersion",
       "ec2:CreateNatGateway",
@@ -36,6 +38,7 @@ data "aws_iam_policy_document" "github_apply_network_compute" {
       "ec2:CreateSecurityGroup",
       "ec2:CreateSubnet",
       "ec2:CreateTags",
+      "ec2:CreateVolume",
       "ec2:CreateVpc",
       "ec2:DeleteFlowLogs",
       "ec2:DeleteInternetGateway",
@@ -56,6 +59,7 @@ data "aws_iam_policy_document" "github_apply_network_compute" {
       "ec2:ModifySubnetAttribute",
       "ec2:ModifyVpcAttribute",
       "ec2:ReleaseAddress",
+      "ec2:RunInstances",
       "ec2:ReplaceRoute",
       "ec2:ReplaceRouteTableAssociation",
       "ec2:RevokeSecurityGroupEgress",
