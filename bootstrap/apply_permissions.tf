@@ -60,6 +60,7 @@ data "aws_iam_policy_document" "github_apply_network_compute" {
       "ec2:ModifyVpcAttribute",
       "ec2:ReleaseAddress",
       "ec2:RunInstances",
+      "ec2:TerminateInstances",
       "ec2:ReplaceRoute",
       "ec2:ReplaceRouteTableAssociation",
       "ec2:RevokeSecurityGroupEgress",
