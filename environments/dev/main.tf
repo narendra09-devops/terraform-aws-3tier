@@ -33,6 +33,7 @@ module "platform" {
   app_subnet_cidrs      = ["10.10.10.0/24", "10.10.11.0/24"]
   database_subnet_cidrs = ["10.10.20.0/24", "10.10.21.0/24"]
   nat_gateway_mode      = "single"
+  enable_https          = false
   certificate_arn       = var.certificate_arn
   instance_type         = "t3.micro"
   asg_min_size          = 1

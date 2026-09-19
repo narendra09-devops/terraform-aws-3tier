@@ -9,7 +9,7 @@ resource "aws_security_group" "alb" {
 
 resource "aws_vpc_security_group_ingress_rule" "alb_http" {
   security_group_id = aws_security_group.alb.id
-  description       = "HTTP redirect to HTTPS"
+  description       = var.enable_https ? "HTTP redirect to HTTPS" : "HTTP access to the development ALB"
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
   to_port           = 80
@@ -17,6 +17,8 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb_https" {
+  count = var.enable_https ? 1 : 0
+
   security_group_id = aws_security_group.alb.id
   description       = "HTTPS from the internet"
   cidr_ipv4         = "0.0.0.0/0"

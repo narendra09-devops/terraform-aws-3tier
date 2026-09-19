@@ -38,11 +38,24 @@ variable "db_port" {
   type    = number
   default = 3306
 }
+
+variable "enable_https" {
+  description = "Enable the HTTPS listener and redirect HTTP traffic to HTTPS."
+  type        = bool
+  default     = true
+}
+
 variable "certificate_arn" {
-  description = "ACM certificate ARN for the HTTPS listener."
+  description = "ACM certificate ARN. Required when enable_https is true."
   type        = string
+  default     = null
+  nullable    = true
+
   validation {
-    condition     = can(regex("^arn:[^:]+:acm:[^:]+:[0-9]{12}:certificate/.+$", var.certificate_arn))
+    condition = var.certificate_arn == null ? true : (
+      trimspace(var.certificate_arn) == "" ||
+      can(regex("^arn:[^:]+:acm:[^:]+:[0-9]{12}:certificate/.+$", var.certificate_arn))
+    )
     error_message = "certificate_arn must be a valid regional ACM certificate ARN."
   }
 }

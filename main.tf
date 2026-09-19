@@ -4,6 +4,7 @@ data "aws_region" "current" {}
 locals {
   name                 = "${var.project_name}-${var.environment}"
   alert_email          = var.alert_email != null && trimspace(var.alert_email) != "" ? var.alert_email : null
+  certificate_arn      = var.certificate_arn != null && trimspace(var.certificate_arn) != "" ? var.certificate_arn : null
   route53_zone_id      = var.route53_zone_id != null && trimspace(var.route53_zone_id) != "" ? var.route53_zone_id : null
   domain_name          = var.domain_name != null && trimspace(var.domain_name) != "" ? var.domain_name : null
   cloudwatch_log_group = var.cloudwatch_log_group != null && trimspace(var.cloudwatch_log_group) != "" ? var.cloudwatch_log_group : "/${var.project_name}/${var.environment}/application"
@@ -30,11 +31,12 @@ module "vpc" {
 module "security" {
   source = "./modules/security"
 
-  name     = local.name
-  vpc_id   = module.vpc.vpc_id
-  app_port = var.app_port
-  db_port  = var.db_port
-  tags     = local.common_tags
+  name         = local.name
+  vpc_id       = module.vpc.vpc_id
+  app_port     = var.app_port
+  db_port      = var.db_port
+  enable_https = var.enable_https
+  tags         = local.common_tags
 }
 
 module "storage" {
@@ -89,7 +91,8 @@ module "alb" {
   public_subnet_ids   = module.vpc.public_subnet_ids
   security_group_id   = module.security.alb_security_group_id
   target_port         = var.app_port
-  certificate_arn     = var.certificate_arn
+  enable_https        = var.enable_https
+  certificate_arn     = local.certificate_arn
   logs_bucket_name    = module.storage.alb_logs_bucket_name
   health_check_path   = var.health_check_path
   deletion_protection = var.alb_deletion_protection

@@ -6,7 +6,11 @@ variable "owner" {
   type    = string
   default = "Narendra-Singh"
 }
-variable "certificate_arn" { type = string }
+variable "certificate_arn" {
+  type     = string
+  default  = null
+  nullable = true
+}
 variable "alert_email" {
   type    = string
   default = null

@@ -1,6 +1,8 @@
 output "application_url" {
-  description = "HTTPS URL for the application."
-  value       = local.domain_name != null ? "https://${local.domain_name}" : null
+  description = "Application URL for the selected listener mode."
+  value = var.enable_https ? (
+    local.domain_name != null ? "https://${local.domain_name}" : null
+  ) : "http://${module.alb.dns_name}"
 }
 
 output "alb_dns_name" { value = module.alb.dns_name }
