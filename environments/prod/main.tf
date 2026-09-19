@@ -20,6 +20,11 @@ provider "aws" {
 
 data "aws_availability_zones" "available" {
   state = "available"
+
+  filter {
+    name   = "zone-name"
+    values = ["${var.aws_region}a", "${var.aws_region}b"]
+  }
 }
 
 module "platform" {

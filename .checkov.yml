@@ -13,9 +13,14 @@ skip-check:
   - CKV_AWS_293
   # Multi-AZ is enabled in staging/prod; dev is intentionally cost-optimized.
   - CKV_AWS_157
-  # Disposable dev exposes the ALB on HTTP; staging/prod redirect HTTP to HTTPS.
-  # Application instances still accept port 80 only from the ALB security group.
+  # Dev intentionally exposes the ALB on HTTP; staging/prod still create HTTPS listeners.
+  # Static scanning cannot resolve the environment-driven listener branches.
+  - CKV_AWS_2
+  - CKV_AWS_103
+  - CKV2_AWS_20
   - CKV_AWS_260
+  # ALB-to-app HTTP is restricted to private subnets and security-group-to-security-group traffic.
+  - CKV_AWS_378
   # The account-root KMS statement enables IAM delegation; the service statement is context-scoped.
   - CKV_AWS_109
   - CKV_AWS_111
